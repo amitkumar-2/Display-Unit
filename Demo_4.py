@@ -3,6 +3,8 @@ import serial
 import tkinter as tk
 from PIL import Image, ImageTk
 
+from Objects import CustomImageLabel
+
 # defined object to make connection with serial port
 class SerialCommunication:
     def __init__(self):
@@ -84,10 +86,14 @@ class multiplePages(tk.Tk):
                     response_hex = " ".join("{:02X}".format(byte) for byte in response)
                     if response_hex == "A5 06 83 55 00 01 00 01":
                         self.pages['B_Test_Sheet'].yes_image_label.place(x=865, y=147)
+                        # self.pages['B_Test_Sheet'].hide_image()
+                        self.pages['B_Test_Sheet'].image_label1.show_label()
                         
                     elif response_hex == "A5 06 83 55 00 01 00 00":
                         self.pages['B_Test_Sheet'].yes_image_label.place_forget()
                         self.pages['B_Test_Sheet'].cross_image_label.place(x=865, y=147)
+                        self.pages['B_Test_Sheet'].image_label1.hide_label()
+                        
                     elif response_hex == "A5 06 83 55 00 01 00 02":
                         self.pages['B_Test_Sheet'].yes_image_label.place_forget()
                         self.pages['B_Test_Sheet'].cross_image_label.place_forget()
@@ -134,7 +140,7 @@ class Page1(tk.Frame):
         
         
         self.product_frame = tk.Frame(self, width=300, height=400)
-        self.product_frame.config(background="#FFFFFF")
+        self.product_frame.config(background="#B0D7F6")
         # self.product_frame.place(x=500, y=20)
         
         self.product_A = tk.Button(self.product_frame, text="Product A", borderwidth=2, padx=20)
@@ -268,11 +274,20 @@ class B_Test_Sheet(tk.Frame):
         # self.yes_image_label.place(x=565, y=347)
         # self.yes_image_label.pack_forget()
         
+        self.image_label1 = CustomImageLabel(self, image_path="images\\empty-checkbox.png", pos_x=50, pos_y=50, width=80, height=80, bg_color=self_background_color)
+        # self.image_label1.hide_label()
+        
         
         button = tk.Button(self, text="Prev", width=10,font =
                     ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Page1"))
         button.place(x=1175, y=670)
-
+        
+        # button = tk.Button(self, text="Prev", width=10,font =
+        #             ('calibri', 13, 'bold'),  command=lambda: self.hide_image())
+        # button.place(x=875, y=670)
+    
+    # def hide_image(self):
+    #     self.image_label1.hide_label()
 
 
 

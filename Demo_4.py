@@ -84,19 +84,22 @@ class multiplePages(tk.Tk):
                 response = serial_comm.read_data()
                 if response:
                     response_hex = " ".join("{:02X}".format(byte) for byte in response)
-                    if response_hex == "A5 06 83 55 00 01 00 01":
-                        self.pages['B_Test_Sheet'].yes_image_label.place(x=865, y=147)
-                        # self.pages['B_Test_Sheet'].hide_image()
-                        self.pages['B_Test_Sheet'].image_label1.show_label()
+                    
+                    sorted_string = response_hex[:len(response_hex)-9]
+                    if sorted_string == "A5 06 83 55 00":
+                        if response_hex == "A5 06 83 55 00 01 00 01":
+                            self.pages['B_Test_Sheet'].led_1_state_yes_image.show_label()
+                            self.pages['B_Test_Sheet'].led_1_state_cross_image.hide_label()
+                            
+                        elif response_hex == "A5 06 83 55 00 01 00 00":
+                            self.pages['B_Test_Sheet'].led_1_state_yes_image.hide_label()
+                            self.pages['B_Test_Sheet'].led_1_state_cross_image.show_label()
+                            
+                            
+                        elif response_hex == "A5 06 83 55 00 01 00 02":
+                            self.pages['B_Test_Sheet'].led_1_state_cross_image.hide_label()
+                            self.pages['B_Test_Sheet'].led_1_state_yes_image.hide_label()
                         
-                    elif response_hex == "A5 06 83 55 00 01 00 00":
-                        self.pages['B_Test_Sheet'].yes_image_label.place_forget()
-                        self.pages['B_Test_Sheet'].cross_image_label.place(x=865, y=147)
-                        self.pages['B_Test_Sheet'].image_label1.hide_label()
-                        
-                    elif response_hex == "A5 06 83 55 00 01 00 02":
-                        self.pages['B_Test_Sheet'].yes_image_label.place_forget()
-                        self.pages['B_Test_Sheet'].cross_image_label.place_forget()
                         
                         
                 self.container.update()
@@ -251,43 +254,48 @@ class B_Test_Sheet(tk.Frame):
         self.led_2_state.place(x=630, y=252)
         
         
-        self.empty_image = Image.open('images\\empty-checkbox.png')
-        self.empty_resized_image = self.empty_image.resize((80, 80), Image.ANTIALIAS)
-        empty_photo = ImageTk.PhotoImage(self.empty_resized_image)
-        self.empty_image_label = tk.Label(self, image=empty_photo, background=self_background_color)
-        self.empty_image_label.image = empty_photo
-        self.empty_image_label.place(x=850, y=132)
+        # self.empty_image = Image.open('images\\empty-checkbox.png')
+        # self.empty_resized_image = self.empty_image.resize((80, 80), Image.ANTIALIAS)
+        # empty_photo = ImageTk.PhotoImage(self.empty_resized_image)
+        # self.empty_image_label = tk.Label(self, image=empty_photo, background=self_background_color)
+        # self.empty_image_label.image = empty_photo
+        # self.empty_image_label.place(x=850, y=132)
         
         
-        self.cross_image = Image.open('images\\cross.png')
-        self.cross_resized_image1 = self.cross_image.resize((50, 50), Image.ANTIALIAS)
-        cross_photo = ImageTk.PhotoImage(self.cross_resized_image1)
-        self.cross_image_label = tk.Label(self, image=cross_photo, background=self_background_color)
-        self.cross_image_label.image = cross_photo
+        # self.cross_image = Image.open('images\\cross.png')
+        # self.cross_resized_image1 = self.cross_image.resize((50, 50), Image.ANTIALIAS)
+        # cross_photo = ImageTk.PhotoImage(self.cross_resized_image1)
+        # self.cross_image_label = tk.Label(self, image=cross_photo, background=self_background_color)
+        # self.cross_image_label.image = cross_photo
         
         
-        self.yes_image = Image.open('images\\yes.png')
-        self.yes_resized_image = self.yes_image.resize((50, 50), Image.ANTIALIAS)
-        yes_photo = ImageTk.PhotoImage(self.yes_resized_image)
-        self.yes_image_label = tk.Label(self, image=yes_photo, background=self_background_color)
-        self.yes_image_label.image = yes_photo
+        # self.yes_image = Image.open('images\\yes.png')
+        # self.yes_resized_image = self.yes_image.resize((50, 50), Image.ANTIALIAS)
+        # yes_photo = ImageTk.PhotoImage(self.yes_resized_image)
+        # self.yes_image_label = tk.Label(self, image=yes_photo, background=self_background_color)
+        # self.yes_image_label.image = yes_photo
         # self.yes_image_label.place(x=565, y=347)
         # self.yes_image_label.pack_forget()
         
-        self.image_label1 = CustomImageLabel(self, image_path="images\\empty-checkbox.png", pos_x=50, pos_y=50, width=80, height=80, bg_color=self_background_color)
-        # self.image_label1.hide_label()
+        self.led_1_state_empty_image = CustomImageLabel(self, image_path="images\\empty-checkbox.png", pos_x=850, pos_y=132, width=80, height=80, bg_color=self_background_color)
+        self.led_1_state_empty_image.show_label()
+        self.led_1_state_yes_image = CustomImageLabel(self, image_path="images\\yes.png", pos_x=865, pos_y=147, width=50, height=50, bg_color=self_background_color)
+        self.led_1_state_cross_image = CustomImageLabel(self, image_path="images\\cross.png", pos_x=865, pos_y=147, width=50, height=50, bg_color=self_background_color)
+        
+        
+        # self.image_label1 = CustomImageLabel(self, image_path="images\\empty-checkbox.png", pos_x=850, pos_y=232, width=80, height=80, bg_color=self_background_color)
+        
+        self.led_2_state_empty_image = CustomImageLabel(self, image_path="images\\empty-checkbox.png", pos_x=850, pos_y=232, width=80, height=80, bg_color=self_background_color)
+        self.led_2_state_empty_image.show_label()
+        self.led_2_state_yes_image = CustomImageLabel(self, image_path="images\\yes.png", pos_x=865, pos_y=247, width=50, height=50, bg_color=self_background_color)
+        self.led_2_state_cross_image = CustomImageLabel(self, image_path="images\\cross.png", pos_x=865, pos_y=247, width=50, height=50, bg_color=self_background_color)
+        
         
         
         button = tk.Button(self, text="Prev", width=10,font =
                     ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Page1"))
         button.place(x=1175, y=670)
         
-        # button = tk.Button(self, text="Prev", width=10,font =
-        #             ('calibri', 13, 'bold'),  command=lambda: self.hide_image())
-        # button.place(x=875, y=670)
-    
-    # def hide_image(self):
-    #     self.image_label1.hide_label()
 
 
 

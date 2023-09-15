@@ -56,7 +56,7 @@ class CustomImageLabel(tk.Label):
         self.image_path = image_path
         self.bg_color = bg_color
         self.load_image()
-        self.place(x=self.pos_x, y=self.pos_y)
+        # self.place(x=self.pos_x, y=self.pos_y)
         self.config(background=self.bg_color)
 
     def load_image(self):

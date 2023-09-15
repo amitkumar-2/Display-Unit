@@ -1,8 +1,8 @@
 # Importing Libraries
 import serial
 import tkinter as tk
-from PIL import Image, ImageTk
-
+# from PIL import Image, ImageTk
+import threading
 from Objects import CustomImageLabel
 
 # defined object to make connection with serial port
@@ -45,7 +45,7 @@ class multiplePages(tk.Tk):
         self.container.pack(fill='both', expand=True)
         self.pages = {}
         
-        for PageClass in [Page1, Page2, B_Test_Sheet]:
+        for PageClass in [Main_Page, A_Test_Sheet, B_Test_Sheet]:
             page_name = PageClass.__name__
             page = PageClass(self.container, self)
             self.pages[page_name] = page
@@ -56,7 +56,7 @@ class multiplePages(tk.Tk):
         self.container.rowconfigure(0, weight=1)
         
         # Show the initial page
-        self.show_page("Page1")
+        self.show_page("Main_Page")
         
         
         # Create and configure the serial connection
@@ -67,10 +67,10 @@ class multiplePages(tk.Tk):
             print("Serial port is not open!!")
         
         # Start the data polling
-        try:
-            self.poll_serial_data()
-        except:
-            print("Serial port is not open!!")
+        # try:
+        #     self.poll_serial_data()
+        # except:
+        #     print("Serial port is not open!!")
         
     def send_data(self, data):
         # Send data when the button is clicked
@@ -85,32 +85,70 @@ class multiplePages(tk.Tk):
                 if response:
                     response_hex = " ".join("{:02X}".format(byte) for byte in response)
                     
+                    # sorting the respose hex code to match the half of response data
+                    # Sorting it to decrease time complexity
                     sorted_string = response_hex[:len(response_hex)-9]
-                    if sorted_string == "A5 06 83 55 00":
-                        if response_hex == "A5 06 83 55 00 01 00 01":
+                    
+                    # defined statement to exact math with half response data from dwin display
+                    # Every statement depends on response which comes from when display event happens
+                    if sorted_string == "A5 06 83 35 00":
+                        if response_hex == "A5 06 83 35 00 01 00 01":
                             self.pages['B_Test_Sheet'].led_1_state_yes_image.show_label()
                             self.pages['B_Test_Sheet'].led_1_state_cross_image.hide_label()
                             
-                        elif response_hex == "A5 06 83 55 00 01 00 00":
+                        elif response_hex == "A5 06 83 35 00 01 00 00":
                             self.pages['B_Test_Sheet'].led_1_state_yes_image.hide_label()
                             self.pages['B_Test_Sheet'].led_1_state_cross_image.show_label()
                             
-                            
-                        elif response_hex == "A5 06 83 55 00 01 00 02":
+                        elif response_hex == "A5 06 83 35 00 01 00 02":
                             self.pages['B_Test_Sheet'].led_1_state_cross_image.hide_label()
                             self.pages['B_Test_Sheet'].led_1_state_yes_image.hide_label()
+                            
+                    elif sorted_string == "A5 06 83 55 00":
+                        if response_hex == "A5 06 83 55 00 01 00 01":
+                            self.pages['B_Test_Sheet'].led_2_state_yes_image.show_label()
+                            self.pages['B_Test_Sheet'].led_2_state_cross_image.hide_label()
+                            
+                        elif response_hex == "A5 06 83 55 00 01 00 00":
+                            self.pages['B_Test_Sheet'].led_2_state_yes_image.hide_label()
+                            self.pages['B_Test_Sheet'].led_2_state_cross_image.show_label()
+                            
+                        elif response_hex == "A5 06 83 55 00 01 00 02":
+                            self.pages['B_Test_Sheet'].led_2_state_cross_image.hide_label()
+                            self.pages['B_Test_Sheet'].led_2_state_yes_image.hide_label()
+                    
+                    elif sorted_string == "A5 06 83 45 00":
+                        if response_hex == "A5 06 83 45 00 01 00 01":
+                            self.pages['A_Test_Sheet'].color_yes_image.show_label()
+                            self.pages['A_Test_Sheet'].color_cross_image.hide_label()
+                            
+                        elif response_hex == "A5 06 83 45 00 01 00 00":
+                            self.pages['A_Test_Sheet'].color_yes_image.hide_label()
+                            self.pages['A_Test_Sheet'].color_cross_image.show_label()
+                            
+                        elif response_hex == "A5 06 83 45 00 01 00 02":
+                            self.pages['A_Test_Sheet'].color_cross_image.hide_label()
+                            self.pages['A_Test_Sheet'].color_yes_image.hide_label()
+                    
+                    elif sorted_string == "A5 06 83 65 00":
+                        if response_hex == "A5 06 83 65 00 01 00 01":
+                            self.pages['A_Test_Sheet'].brightness_yes_image.show_label()
+                            self.pages['A_Test_Sheet'].brightness_cross_image.hide_label()
+                            
+                        elif response_hex == "A5 06 83 65 00 01 00 00":
+                            self.pages['A_Test_Sheet'].brightness_yes_image.hide_label()
+                            self.pages['A_Test_Sheet'].brightness_cross_image.show_label()
+                            
+                        elif response_hex == "A5 06 83 65 00 01 00 02":
+                            self.pages['A_Test_Sheet'].brightness_cross_image.hide_label()
+                            self.pages['A_Test_Sheet'].brightness_yes_image.hide_label()
                         
                         
-                        
-                self.container.update()
+                # self.container.update()
         except KeyboardInterrupt:
             print("Serial polling stopped by user.")
         finally:
             serial_comm.close_serial()
-        
-        
-        
-        
         
         
     # functio To show selected page
@@ -118,22 +156,15 @@ class multiplePages(tk.Tk):
         # Show the selected page
         page = self.pages[page_name]
         page.tkraise()
-    
 
 
-
-
-class Page1(tk.Frame):
+# Define class for main page
+class Main_Page(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.config(background=self_background_color)
         
-        # label = tk.Label(self, text="Page 1", font=("Arial", 20))
-        # label.pack(pady=20)
-        
-        # self.ser_obj = SerialCommunication()
-        
-        
+        # Define function to show or hide frame
         def toggle_visibility():
             if self.product_frame.winfo_viewable():
                 self.product_frame.place_forget()  # Hide the self.product_A
@@ -141,10 +172,9 @@ class Page1(tk.Frame):
                 self.product_frame.place(x=500, y=20)  # Show the self.product_A
         
         
-        
+        # Product frame to show information about products
         self.product_frame = tk.Frame(self, width=300, height=400)
         self.product_frame.config(background="#B0D7F6")
-        # self.product_frame.place(x=500, y=20)
         
         self.product_A = tk.Button(self.product_frame, text="Product A", borderwidth=2, padx=20)
         self.product_A.place(x=10, y=40)
@@ -156,13 +186,13 @@ class Page1(tk.Frame):
         self.product_B_sheet = tk.Button(self.product_frame, text="Select", borderwidth=2, command=lambda: serial_comm.write_data(data=b'\x5A\xA5\x07\x82\x00\x84\x5A\x01\x00\x01'))
         self.product_B_sheet.place(x=150, y=100)
         
-        self.product_A_select = tk.Button(self.product_frame, text="Go To", borderwidth=2, command=lambda: controller.show_page("Page2"))
+        self.product_A_select = tk.Button(self.product_frame, text="Go To", borderwidth=2, command=lambda: controller.show_page("A_Test_Sheet"))
         self.product_A_select.place(x=200, y=40)
         self.product_B_select = tk.Button(self.product_frame, text="Go To", borderwidth=2, command=lambda: controller.show_page("B_Test_Sheet"))
         self.product_B_select.place(x=200, y=100)
         
         
-        
+        # Defined Left frame to design main page
         self.left_frame = tk.Frame(self, width=300, height=900)
         self.left_frame.config(background="#B0D7F6")
         self.left_frame.pack(side="left")
@@ -173,14 +203,13 @@ class Page1(tk.Frame):
         
         
         
-        
-        
-        button = tk.Button(self, text="Next", width=10,font =
-                    ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Page2"))
-        button.place(x=1175, y=670)
+        # button = tk.Button(self, text="Next", width=10,font =
+        #             ('calibri', 13, 'bold'),  command=lambda: controller.show_page("A_Test_Sheet"))
+        # button.place(x=1175, y=670)
 
 
-class Page2(tk.Frame):
+# Defined class to show A product test sheet page
+class A_Test_Sheet(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.config(background=self_background_color)
@@ -189,63 +218,71 @@ class Page2(tk.Frame):
         label.pack(pady=20)
         
         
+        self.led_1_state = tk.Label(self, text="Color: ", font=('', 18, 'bold'), fg='white', bg=self_background_color)
+        self.led_1_state.place(x=630, y=152)
+        
+        self.led_2_state = tk.Label(self, text="Brightness: ", font=('', 18, 'bold'), fg='white', bg=self_background_color)
+        self.led_2_state.place(x=630, y=252)
         
         
-        # self.yes_image = tk.Label(self, image="images\\Yes-Check-Box.png")
-        
-        self.led_1_state = tk.Label(self, text="LED 1 STATE", font=('', 18, 'bold'), fg='white', bg=self_background_color)
-        self.led_1_state.place(x=350, y=332)
-        
-        
-        self.empty_image = Image.open('images\\empty-checkbox.png')
-        self.empty_resized_image = self.empty_image.resize((80, 80), Image.ANTIALIAS)
-        empty_photo = ImageTk.PhotoImage(self.empty_resized_image)
-        self.empty_image_label = tk.Label(self, image=empty_photo, background=self_background_color)
-        self.empty_image_label.image = empty_photo
-        self.empty_image_label.place(x=550, y=332)
+        # self.empty_image = Image.open('images\\empty-checkbox.png')
+        # self.empty_resized_image = self.empty_image.resize((80, 80), Image.ANTIALIAS)
+        # empty_photo = ImageTk.PhotoImage(self.empty_resized_image)
+        # self.empty_image_label = tk.Label(self, image=empty_photo, background=self_background_color)
+        # self.empty_image_label.image = empty_photo
+        # self.empty_image_label.place(x=550, y=332)
         
         
-        self.cross_image = Image.open('images\\cross.png')
-        self.cross_resized_image1 = self.cross_image.resize((50, 50), Image.ANTIALIAS)
-        cross_photo = ImageTk.PhotoImage(self.cross_resized_image1)
-        self.cross_image_label = tk.Label(self, image=cross_photo, background=self_background_color)
-        self.cross_image_label.image = cross_photo
+        # self.cross_image = Image.open('images\\cross.png')
+        # self.cross_resized_image1 = self.cross_image.resize((50, 50), Image.ANTIALIAS)
+        # cross_photo = ImageTk.PhotoImage(self.cross_resized_image1)
+        # self.cross_image_label = tk.Label(self, image=cross_photo, background=self_background_color)
+        # self.cross_image_label.image = cross_photo
         
         
-        self.yes_image = Image.open('images\\yes.png')
-        self.yes_resized_image = self.yes_image.resize((50, 50), Image.ANTIALIAS)
-        yes_photo = ImageTk.PhotoImage(self.yes_resized_image)
-        self.yes_image_label = tk.Label(self, image=yes_photo, background=self_background_color)
-        self.yes_image_label.image = yes_photo
+        # self.yes_image = Image.open('images\\yes.png')
+        # self.yes_resized_image = self.yes_image.resize((50, 50), Image.ANTIALIAS)
+        # yes_photo = ImageTk.PhotoImage(self.yes_resized_image)
+        # self.yes_image_label = tk.Label(self, image=yes_photo, background=self_background_color)
+        # self.yes_image_label.image = yes_photo
         # self.yes_image_label.place(x=565, y=347)
         # self.yes_image_label.pack_forget()
         
         
+        self.color_empty_image = CustomImageLabel(self, image_path="images\\empty-checkbox.png", pos_x=850, pos_y=132, width=80, height=80, bg_color=self_background_color)
+        self.color_empty_image.show_label()
+        self.color_yes_image = CustomImageLabel(self, image_path="images\\yes.png", pos_x=865, pos_y=147, width=50, height=50, bg_color=self_background_color)
+        self.color_cross_image = CustomImageLabel(self, image_path="images\\cross.png", pos_x=865, pos_y=147, width=50, height=50, bg_color=self_background_color)
+        
+        
+        self.brightness_empty_image = CustomImageLabel(self, image_path="images\\empty-checkbox.png", pos_x=850, pos_y=232, width=80, height=80, bg_color=self_background_color)
+        self.brightness_empty_image.show_label()
+        self.brightness_yes_image = CustomImageLabel(self, image_path="images\\yes.png", pos_x=865, pos_y=247, width=50, height=50, bg_color=self_background_color)
+        self.brightness_cross_image = CustomImageLabel(self, image_path="images\\cross.png", pos_x=865, pos_y=247, width=50, height=50, bg_color=self_background_color)
+        
+        
+        
         button = tk.Button(self, text="Prev", width=10,font =
-                    ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Page1"))
+                    ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Main_Page"))
         button.place(x=1175, y=670)
-   
-    
-    
+
+
+# Function to make selected or deselected checkboxes
 def toggle_checkbox_state(checkbox):
     checkbox.select() if not checkbox.instate(['selected']) else checkbox.deselect()
 
 
 
 
-
+# Define class to show and manipulate B product test sheet page
 class B_Test_Sheet(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.config(background=self_background_color)
         
+        # Defined text labels here
         label = tk.Label(self, text="Product B Test Sheet", font=("Arial", 20, 'bold'), bg=self_background_color, fg='white')
         label.pack(pady=20)
-        
-        
-        
-        
-        # self.yes_image = tk.Label(self, image="images\\Yes-Check-Box.png")
         
         self.led_1_state = tk.Label(self, text="LED 1 STATE: ", font=('', 18, 'bold'), fg='white', bg=self_background_color)
         self.led_1_state.place(x=630, y=152)
@@ -277,31 +314,33 @@ class B_Test_Sheet(tk.Frame):
         # self.yes_image_label.place(x=565, y=347)
         # self.yes_image_label.pack_forget()
         
+        # Led_1_State images to make attractive checkboxes
         self.led_1_state_empty_image = CustomImageLabel(self, image_path="images\\empty-checkbox.png", pos_x=850, pos_y=132, width=80, height=80, bg_color=self_background_color)
         self.led_1_state_empty_image.show_label()
         self.led_1_state_yes_image = CustomImageLabel(self, image_path="images\\yes.png", pos_x=865, pos_y=147, width=50, height=50, bg_color=self_background_color)
         self.led_1_state_cross_image = CustomImageLabel(self, image_path="images\\cross.png", pos_x=865, pos_y=147, width=50, height=50, bg_color=self_background_color)
         
-        
-        # self.image_label1 = CustomImageLabel(self, image_path="images\\empty-checkbox.png", pos_x=850, pos_y=232, width=80, height=80, bg_color=self_background_color)
-        
+        # Led_2_State images to make attractive checkboxes
         self.led_2_state_empty_image = CustomImageLabel(self, image_path="images\\empty-checkbox.png", pos_x=850, pos_y=232, width=80, height=80, bg_color=self_background_color)
         self.led_2_state_empty_image.show_label()
         self.led_2_state_yes_image = CustomImageLabel(self, image_path="images\\yes.png", pos_x=865, pos_y=247, width=50, height=50, bg_color=self_background_color)
         self.led_2_state_cross_image = CustomImageLabel(self, image_path="images\\cross.png", pos_x=865, pos_y=247, width=50, height=50, bg_color=self_background_color)
         
         
-        
         button = tk.Button(self, text="Prev", width=10,font =
-                    ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Page1"))
+                    ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Main_Page"))
         button.place(x=1175, y=670)
         
 
 
-
-
-
-
 if __name__ == "__main__":
+    
+    # Creating instance for multipages app
     root = multiplePages()
+    
+    # Create a separate thread for serial polling
+    serial_thread = threading.Thread(target=root.poll_serial_data)
+    serial_thread.daemon = True  # Allow the thread to exit when the main program exits
+    serial_thread.start()
+    
     root.mainloop()

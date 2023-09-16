@@ -44,7 +44,9 @@
 
 
 import tkinter as tk
+# from tkinter import ttk
 from PIL import Image, ImageTk
+# import tkinter as printdialog
 
 class CustomImageLabel(tk.Label):
     def __init__(self, parent, image_path, pos_x, pos_y, bg_color, width=None, height=None):
@@ -62,7 +64,7 @@ class CustomImageLabel(tk.Label):
     def load_image(self):
         image = Image.open(self.image_path)
         if self.width and self.height:
-            image = image.resize((self.width, self.height), Image.ANTIALIAS)
+            image = image.resize((self.width, self.height)) #, Image.ANTIALIAS)
         self.photo = ImageTk.PhotoImage(image=image)
         self.configure(image=self.photo)
     
@@ -84,3 +86,13 @@ class CustomImageLabel(tk.Label):
 
 # Run the tkinter main loop
 # root.mainloop()
+
+
+# =========================================================================================================
+# =========================================================================================================
+# =================================== Print Method =======================================================
+# =========================================================================================================
+# =========================================================================================================
+
+# class PrintMethod:
+#     def __init__(self):

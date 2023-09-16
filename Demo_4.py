@@ -34,6 +34,15 @@ class SerialCommunication:
 # Define bg color to the variable
 self_background_color = '#000087'
 
+# Dictionary to store the last response of display on a specific event
+last_response = {
+    "A5 06 83 35 00": None,
+    "A5 06 83 55 00": None,
+    "A5 06 83 45 00": None,
+    "A5 06 83 65 00": None,
+}
+
+
 # Defined common object to handel the app pages functions, events and behaviors
 class multiplePages(tk.Tk):
     def __init__(self):
@@ -84,7 +93,7 @@ class multiplePages(tk.Tk):
                 response = serial_comm.read_data()
                 if response:
                     response_hex = " ".join("{:02X}".format(byte) for byte in response)
-                    
+                    print(response_hex)
                     # sorting the respose hex code to match the half of response data
                     # Sorting it to decrease time complexity
                     sorted_string = response_hex[:len(response_hex)-9]
@@ -95,55 +104,73 @@ class multiplePages(tk.Tk):
                         if response_hex == "A5 06 83 35 00 01 00 01":
                             self.pages['B_Test_Sheet'].led_1_state_yes_image.show_label()
                             self.pages['B_Test_Sheet'].led_1_state_cross_image.hide_label()
+                            last_response["A5 06 83 35 00"] = True
                             
                         elif response_hex == "A5 06 83 35 00 01 00 00":
                             self.pages['B_Test_Sheet'].led_1_state_yes_image.hide_label()
                             self.pages['B_Test_Sheet'].led_1_state_cross_image.show_label()
+                            last_response["A5 06 83 35 00"] = False
                             
                         elif response_hex == "A5 06 83 35 00 01 00 02":
                             self.pages['B_Test_Sheet'].led_1_state_cross_image.hide_label()
                             self.pages['B_Test_Sheet'].led_1_state_yes_image.hide_label()
+                            last_response["A5 06 83 35 00"] = None
                             
                     elif sorted_string == "A5 06 83 55 00":
                         if response_hex == "A5 06 83 55 00 01 00 01":
                             self.pages['B_Test_Sheet'].led_2_state_yes_image.show_label()
                             self.pages['B_Test_Sheet'].led_2_state_cross_image.hide_label()
+                            last_response["A5 06 83 55 00"] = True
                             
                         elif response_hex == "A5 06 83 55 00 01 00 00":
                             self.pages['B_Test_Sheet'].led_2_state_yes_image.hide_label()
                             self.pages['B_Test_Sheet'].led_2_state_cross_image.show_label()
+                            last_response["A5 06 83 55 00"] = False
                             
                         elif response_hex == "A5 06 83 55 00 01 00 02":
                             self.pages['B_Test_Sheet'].led_2_state_cross_image.hide_label()
                             self.pages['B_Test_Sheet'].led_2_state_yes_image.hide_label()
+                            last_response["A5 06 83 55 00"] = None
                     
                     elif sorted_string == "A5 06 83 45 00":
                         if response_hex == "A5 06 83 45 00 01 00 01":
                             self.pages['A_Test_Sheet'].color_yes_image.show_label()
                             self.pages['A_Test_Sheet'].color_cross_image.hide_label()
+                            last_response["A5 06 83 45 00"] = True
                             
                         elif response_hex == "A5 06 83 45 00 01 00 00":
                             self.pages['A_Test_Sheet'].color_yes_image.hide_label()
                             self.pages['A_Test_Sheet'].color_cross_image.show_label()
+                            last_response["A5 06 83 45 00"] = False
                             
                         elif response_hex == "A5 06 83 45 00 01 00 02":
                             self.pages['A_Test_Sheet'].color_cross_image.hide_label()
                             self.pages['A_Test_Sheet'].color_yes_image.hide_label()
+                            last_response["A5 06 83 45 00"] = None
                     
                     elif sorted_string == "A5 06 83 65 00":
                         if response_hex == "A5 06 83 65 00 01 00 01":
                             self.pages['A_Test_Sheet'].brightness_yes_image.show_label()
                             self.pages['A_Test_Sheet'].brightness_cross_image.hide_label()
+                            last_response["A5 06 83 65 00"] = True
                             
                         elif response_hex == "A5 06 83 65 00 01 00 00":
                             self.pages['A_Test_Sheet'].brightness_yes_image.hide_label()
                             self.pages['A_Test_Sheet'].brightness_cross_image.show_label()
+                            last_response["A5 06 83 65 00"] = False
                             
                         elif response_hex == "A5 06 83 65 00 01 00 02":
                             self.pages['A_Test_Sheet'].brightness_cross_image.hide_label()
                             self.pages['A_Test_Sheet'].brightness_yes_image.hide_label()
-                        
-                        
+                            last_response["A5 06 83 65 00"] = None
+                    
+                    elif sorted_string == "A5 06 83 85 00":
+                        if response_hex == "A5 06 83 85 00 01 00 01":
+                            self.pages['B_Test_Sheet'].test_b_print_button.place(x=875, y=670)
+                            self.pages['B_Test_Sheet'].test_b_save_button.place(x=1075, y=670)
+                            print(last_response)
+                    
+                    
                 # self.container.update()
         except KeyboardInterrupt:
             print("Serial polling stopped by user.")
@@ -261,10 +288,17 @@ class A_Test_Sheet(tk.Frame):
         self.brightness_cross_image = CustomImageLabel(self, image_path="images\\cross.png", pos_x=865, pos_y=247, width=50, height=50, bg_color=self_background_color)
         
         
-        
-        button = tk.Button(self, text="Prev", width=10,font =
+        test_a_print_button = tk.Button(self, text="Print", width=10,font =
                     ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Main_Page"))
-        button.place(x=1175, y=670)
+        # test_a_print_button.place(x=875, y=670)
+        
+        test_a_save_button = tk.Button(self, text="Save", width=10,font =
+                    ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Main_Page"))
+        # test_a_save_button.place(x=1075, y=670)
+        
+        test_a_prev_button = tk.Button(self, text="Prev", width=10,font =
+                    ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Main_Page"))
+        test_a_prev_button.place(x=1275, y=670)
 
 
 # Function to make selected or deselected checkboxes
@@ -327,9 +361,17 @@ class B_Test_Sheet(tk.Frame):
         self.led_2_state_cross_image = CustomImageLabel(self, image_path="images\\cross.png", pos_x=865, pos_y=247, width=50, height=50, bg_color=self_background_color)
         
         
-        button = tk.Button(self, text="Prev", width=10,font =
+        self.test_b_print_button = tk.Button(self, text="Print", width=10,font =
                     ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Main_Page"))
-        button.place(x=1175, y=670)
+        # test_b_print_button.place(x=875, y=670)
+        
+        self.test_b_save_button = tk.Button(self, text="Save", width=10,font =
+                    ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Main_Page"))
+        # test_b_save_button.place(x=1075, y=670)
+        
+        test_b_prev_button = tk.Button(self, text="Prev", width=10,font =
+                    ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Main_Page"))
+        test_b_prev_button.place(x=1275, y=670)
         
 
 

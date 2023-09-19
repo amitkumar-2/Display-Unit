@@ -4,6 +4,7 @@ import tkinter as tk
 # from PIL import Image, ImageTk
 import threading
 from Objects import CustomImageLabel
+from downloadableForm import create_pdf
 
 # defined object to make connection with serial port
 class SerialCommunication:
@@ -34,12 +35,27 @@ class SerialCommunication:
 # Define bg color to the variable
 self_background_color = '#000087'
 
+# Commands with their texts
+cmd_txt_dict_a = {
+    "A5 06 83 45 00": "COLORS",
+    "A5 06 83 65 00": "BRIGHTNESS"
+}
+
+cmd_txt_dict_b = {
+    "A5 06 83 35 00": "LED 1 STATE",
+    "A5 06 83 55 00": "LED 2 STATE",
+}
+
 # Dictionary to store the last response of display on a specific event
-last_response = {
-    "A5 06 83 35 00": None,
-    "A5 06 83 55 00": None,
+
+last_response_a = {
     "A5 06 83 45 00": None,
     "A5 06 83 65 00": None,
+}
+
+last_response_b = {
+    "A5 06 83 35 00": None,
+    "A5 06 83 55 00": None,
 }
 
 
@@ -104,71 +120,75 @@ class multiplePages(tk.Tk):
                         if response_hex == "A5 06 83 35 00 01 00 01":
                             self.pages['B_Test_Sheet'].led_1_state_yes_image.show_label()
                             self.pages['B_Test_Sheet'].led_1_state_cross_image.hide_label()
-                            last_response["A5 06 83 35 00"] = True
+                            last_response_b["A5 06 83 35 00"] = True
                             
                         elif response_hex == "A5 06 83 35 00 01 00 00":
                             self.pages['B_Test_Sheet'].led_1_state_yes_image.hide_label()
                             self.pages['B_Test_Sheet'].led_1_state_cross_image.show_label()
-                            last_response["A5 06 83 35 00"] = False
+                            last_response_b["A5 06 83 35 00"] = False
                             
                         elif response_hex == "A5 06 83 35 00 01 00 02":
                             self.pages['B_Test_Sheet'].led_1_state_cross_image.hide_label()
                             self.pages['B_Test_Sheet'].led_1_state_yes_image.hide_label()
-                            last_response["A5 06 83 35 00"] = None
+                            last_response_b["A5 06 83 35 00"] = None
                             
                     elif sorted_string == "A5 06 83 55 00":
                         if response_hex == "A5 06 83 55 00 01 00 01":
                             self.pages['B_Test_Sheet'].led_2_state_yes_image.show_label()
                             self.pages['B_Test_Sheet'].led_2_state_cross_image.hide_label()
-                            last_response["A5 06 83 55 00"] = True
+                            last_response_b["A5 06 83 55 00"] = True
                             
                         elif response_hex == "A5 06 83 55 00 01 00 00":
                             self.pages['B_Test_Sheet'].led_2_state_yes_image.hide_label()
                             self.pages['B_Test_Sheet'].led_2_state_cross_image.show_label()
-                            last_response["A5 06 83 55 00"] = False
+                            last_response_b["A5 06 83 55 00"] = False
                             
                         elif response_hex == "A5 06 83 55 00 01 00 02":
                             self.pages['B_Test_Sheet'].led_2_state_cross_image.hide_label()
                             self.pages['B_Test_Sheet'].led_2_state_yes_image.hide_label()
-                            last_response["A5 06 83 55 00"] = None
+                            last_response_b["A5 06 83 55 00"] = None
                     
                     elif sorted_string == "A5 06 83 45 00":
                         if response_hex == "A5 06 83 45 00 01 00 01":
                             self.pages['A_Test_Sheet'].color_yes_image.show_label()
                             self.pages['A_Test_Sheet'].color_cross_image.hide_label()
-                            last_response["A5 06 83 45 00"] = True
+                            last_response_a["A5 06 83 45 00"] = True
                             
                         elif response_hex == "A5 06 83 45 00 01 00 00":
                             self.pages['A_Test_Sheet'].color_yes_image.hide_label()
                             self.pages['A_Test_Sheet'].color_cross_image.show_label()
-                            last_response["A5 06 83 45 00"] = False
+                            last_response_a["A5 06 83 45 00"] = False
                             
                         elif response_hex == "A5 06 83 45 00 01 00 02":
                             self.pages['A_Test_Sheet'].color_cross_image.hide_label()
                             self.pages['A_Test_Sheet'].color_yes_image.hide_label()
-                            last_response["A5 06 83 45 00"] = None
+                            last_response_a["A5 06 83 45 00"] = None
                     
                     elif sorted_string == "A5 06 83 65 00":
                         if response_hex == "A5 06 83 65 00 01 00 01":
                             self.pages['A_Test_Sheet'].brightness_yes_image.show_label()
                             self.pages['A_Test_Sheet'].brightness_cross_image.hide_label()
-                            last_response["A5 06 83 65 00"] = True
+                            last_response_a["A5 06 83 65 00"] = True
                             
                         elif response_hex == "A5 06 83 65 00 01 00 00":
                             self.pages['A_Test_Sheet'].brightness_yes_image.hide_label()
                             self.pages['A_Test_Sheet'].brightness_cross_image.show_label()
-                            last_response["A5 06 83 65 00"] = False
+                            last_response_a["A5 06 83 65 00"] = False
                             
                         elif response_hex == "A5 06 83 65 00 01 00 02":
                             self.pages['A_Test_Sheet'].brightness_cross_image.hide_label()
                             self.pages['A_Test_Sheet'].brightness_yes_image.hide_label()
-                            last_response["A5 06 83 65 00"] = None
+                            last_response_a["A5 06 83 65 00"] = None
                     
                     elif sorted_string == "A5 06 83 85 00":
                         if response_hex == "A5 06 83 85 00 01 00 01":
                             self.pages['B_Test_Sheet'].test_b_print_button.place(x=875, y=670)
                             self.pages['B_Test_Sheet'].test_b_save_button.place(x=1075, y=670)
-                            print(last_response)
+                            # print(last_response)
+                    elif sorted_string == "A5 06 83 75 00":
+                        if response_hex == "A5 06 83 75 00 01 00 01":
+                            self.pages['A_Test_Sheet'].test_a_print_button.place(x=875, y=670)
+                            self.pages['A_Test_Sheet'].test_a_save_button.place(x=1075, y=670)
                     
                     
                 # self.container.update()
@@ -288,12 +308,12 @@ class A_Test_Sheet(tk.Frame):
         self.brightness_cross_image = CustomImageLabel(self, image_path="images\\cross.png", pos_x=865, pos_y=247, width=50, height=50, bg_color=self_background_color)
         
         
-        test_a_print_button = tk.Button(self, text="Print", width=10,font =
+        self.test_a_print_button = tk.Button(self, text="Print", width=10,font =
                     ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Main_Page"))
         # test_a_print_button.place(x=875, y=670)
         
-        test_a_save_button = tk.Button(self, text="Save", width=10,font =
-                    ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Main_Page"))
+        self.test_a_save_button = tk.Button(self, text="Save", width=10,font =
+                    ('calibri', 13, 'bold'),  command=lambda: create_pdf(cmd_txt_dict=cmd_txt_dict_a, cmd_txt_dict_state=last_response_a))
         # test_a_save_button.place(x=1075, y=670)
         
         test_a_prev_button = tk.Button(self, text="Prev", width=10,font =
@@ -366,7 +386,7 @@ class B_Test_Sheet(tk.Frame):
         # test_b_print_button.place(x=875, y=670)
         
         self.test_b_save_button = tk.Button(self, text="Save", width=10,font =
-                    ('calibri', 13, 'bold'),  command=lambda: controller.show_page("Main_Page"))
+                    ('calibri', 13, 'bold'),  command=lambda: create_pdf(cmd_txt_dict=cmd_txt_dict_b, cmd_txt_dict_state=last_response_b))
         # test_b_save_button.place(x=1075, y=670)
         
         test_b_prev_button = tk.Button(self, text="Prev", width=10,font =

@@ -121,6 +121,9 @@ from reportlab.lib.units import mm, inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
+from reportlab.lib import colors
+from datetime import datetime  # Import the datetime module
+
 
 # cmd_txt_dict_a = {
 #     "A5 06 83 45 00": "COLORS",
@@ -196,6 +199,22 @@ def create_pdf(cmd_txt_dict, cmd_txt_dict_state): #text1, checked, image_x=0, im
     if file_path:
         doc = SimpleDocTemplate(file_path, pagesize=letter)
         story = []
+        
+        # Get the current date and time
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Create a style for the date and time
+        style = getSampleStyleSheet()['Normal']
+        style.textColor = colors.blue  # Set text color to blue
+        
+        # Create a Paragraph with the date and time
+        datetime_paragraph = Paragraph(f"Date and Time: {current_datetime}", style)
+        
+    
+        # Add the date and time to the PDF
+        story.append(datetime_paragraph)
+        story.append(Spacer(1, 12))  # Add some space
+        
         
         for i in range(len(cmd_txt_dict)):
             x = cmd_txt_dict.keys()
